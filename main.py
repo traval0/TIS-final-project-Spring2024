@@ -18,3 +18,6 @@ def index():
 
 if __name__ == "__main__":   # We only start the webserver when this file is called directly
     app.run(debug=True)   # This starts the app
+
+
+    #testing updates
