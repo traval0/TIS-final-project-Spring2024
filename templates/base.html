@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+    <head>
+      {% if title %}
+      <title>{{ title }} - My App</title>
+      {% else %}
+      <title>Welcome to My App</title>
+      {% endif %}
+    </head>
+    <body>
+        <div>My App: <a href="/index">Home</a></div>
+        <hr>
+        {% block content %}{% endblock %}
+    </body>
+</html>
