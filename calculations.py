@@ -11,7 +11,9 @@ url = 'https://www.carboninterface.com/api/v1/estimates'
 # FRONT END TO DO: User information to collect at registration:
 #     1) Username
 #     2) Password
-#     3) Make of vehicle
+#     3) Own car? If so, make of vehicle
+#     4) Diet habit (card profile)
+
 
 # DATA INITIALIZATION
 
@@ -27,6 +29,12 @@ def get_vehicle_models():
         vehicles_dict[item['data']['attributes']['name']] = item['data']['id']
     return vehicles_dict
 vehicles_dict = get_vehicle_models()
+
+# 3) Diet habits
+diet_habits = ['vegan', 'vegetarian', 'plant_based', 'omnivore']
+
+# 4) Activity types (for carbon calculator and logging activity) - TO-DO: UPDATE THIS AS MORE ACTIVITIES ARE CODED
+activity_types = ['flight', 'driving']
 
 
 # STANDARD HTTP REQUEST

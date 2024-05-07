@@ -2,8 +2,8 @@ from flask import Flask, request, render_template, flash, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy 
 from flask_migrate import Migrate
 from flask_login import login_user, LoginManager, login_required, logout_user, current_user
-from models import db, User
-from forms import LoginForm, RegisterForm
+from models import db, User, UserProfile
+from forms import LoginForm, RegisterForm, CreateProfileForm, FlightForm, VehicleForm
 from dotenv import load_dotenv
 import os
 import requests
@@ -23,7 +23,6 @@ app.config['SECRET_KEY'] = 'thisisasecretkey'
 with app.app_context():
     db.create_all()
 
-
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
@@ -33,7 +32,6 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 
-# routing URL on website to a login & signup page
 @app.route('/')   
 @app.route('/<user>')   # can have multiple routes to the same function
 def index(user=None):
@@ -43,7 +41,6 @@ def index(user=None):
 @app.route('/login', methods=['GET', 'POST'])   
 def login():
     form = LoginForm()
-    # print(form.validate_on_submit())
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user:
@@ -60,29 +57,40 @@ def register():
         new_user = User(username=form.username.data, password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
-        return redirect(url_for('login'))
+        return redirect(url_for('create_profile'))
     return render_template('register.html', form=form)
 
-# features - dashboard, calculator, log
-@app.route('/home')   
-def home():
-    return 'This is the home page with dashboard, calculator, & log'
+@app.route('/createprofile', methods=['GET', 'POST'])  
+@login_required 
+def create_profile():
+    form = CreateProfileForm()
+    if form.validate_on_submit():
+        # Add user profile information to user_profile database
+        user_profile = UserProfile(user_id=current_user.id, user=current_user, birthday=form.birthday.data, 
+                                   number_in_household=form.number_in_household.data, diet_habit=form.diet_habit.data, 
+                                   own_car=form.own_car.data, make_of_vehicle=form.make_of_vehicle.data)
+        db.session.add(user_profile)
+        db.session.commit()
+        return redirect(url_for('dashboard'))
+    return render_template('create_profile.html', form=form)
 
-# routing URL on website to a profile page
-@app.route('/myprofile')   
-def myprofile():
-    return 'This is my profile page'
-
-# routing URL on website to a specific user profile
 @app.route('/profile/<username>')   # variable name here is the same one we want to pass into the function; if not using string, have to specify
 def profile(username):
     return render_template("profile.html", username=username)
 
-# routing URL on website to a dashboard
 @app.route('/dashboard', methods=['GET', 'POST'])   
 @login_required
 def dashboard():
     return render_template("dashboard.html", username=current_user.username)
+
+@app.route('/carbon_calculator', methods=['GET', 'POST'])   
+def carbon_calculator():
+    form = CarbonCalculatorForm()
+    return render_template("carbon_calculator.html")
+
+@app.route('/log_activity', methods=['GET', 'POST'])   
+def log_activity():
+    return render_template("log_activity.html")
 
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required

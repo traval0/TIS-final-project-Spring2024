@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Create Profile</h1>
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.birthday.label }}<br>
+            {{ form.birthday(size=32) }}
+        </p>        
+        <p>
+            {{ form.number_in_household.label }}<br>
+            {{ form.number_in_household(size=32) }}
+        </p>
+        <p>
+            {{ form.diet_habit.label }}<br>
+            {{ form.diet_habit(size=32) }}
+        </p>
+        <p>
+            {{ form.own_car.label }}<br>
+            {{ form.own_car(size=32) }}
+        </p>
+        <p>
+            {{ form.make_of_vehicle.label }}<br>
+            {{ form.make_of_vehicle(size=32) }}
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+    <a href="{{ url_for('dashboard') }}"> View My Dashboard </a>
+{% endblock %}
+
