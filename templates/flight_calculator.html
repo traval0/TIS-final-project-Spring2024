@@ -2,7 +2,19 @@
 
 {% block content %}
     <h1>{{username}} Flight Calculator Page</h1>
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.departure_airport.label }}<br>
+            {{ form.departure_airport(size=32) }}
+        </p>        
+        <p>
+            {{ form.arrival_airport.label }}<br>
+            {{ form.arrival_airport(size=32) }}
+        </p>
+        <p>{{ form.calculate() }}  {{ form.log_activity() }}</p>
+    </form>
     <p></p><a href="{{url_for('carbon_calculator')}}">Back to Main Calculator Page</a></p>
-    <input type="Calculate" name="calculate" value="Calculate">
-    <input type="Log" name="log" value="Log Activity">
+    <!-- <input type="Calculate" name="calculate" value="Calculate">
+    <input type="Log" name="log" value="Log Activity"> -->
 {% endblock %}

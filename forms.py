@@ -32,8 +32,14 @@ class CreateProfileForm(FlaskForm):
 class FlightForm(FlaskForm):
     departure_airport = StringField('Departure Airport (3 letter code)', validators=[InputRequired(), Length(min=3, max=3)])
     arrival_airport = StringField('Arrival Airport (3 letter code)', validators=[InputRequired(), Length(min=3, max=3)])
+    calculate = SubmitField('Calculate Carbon Footprint')
+    log_activity = SubmitField('Log This Activity')
     
 
 class VehicleForm(FlaskForm):
-    departure_airport = StringField('Departure Airport (3 letter code)', validators=[InputRequired(), Length(min=3, max=3)])
-    arrival_airport = StringField('Arrival Airport (3 letter code)', validators=[InputRequired(), Length(min=3, max=3)])
+    distance = IntegerField('How many miles did you drive', validators=[InputRequired()])
+    number_of_passengers = IntegerField('How many passengers were in the vehicle?', validators=[InputRequired()])
+    make_of_vehicle = SelectField('Make of Vehicle', choices=vehicles_dict.keys())
+    calculate = SubmitField('Calculate Carbon Footprint')
+    log_activity = SubmitField('Log This Activity')
+

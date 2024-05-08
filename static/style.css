@@ -1,3 +1,105 @@
-h1 {
-    color: blue;
+/* Basic color scheme using CSS variables */
+:root {
+    --primary-color: #007BFF;
+    --secondary-color: #6C757D;
+    --background-color: #f8f9fa;
+    --text-color: #212529;
+    --btn-text-color: #ffffff;
+    --link-color: #007BFF;
+    --link-hover-color: #0056b3;
+}
+
+/* General body styles */
+body {
+    margin: 50;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+/* Container for content to manage spacing and layout */
+.container {
+    width: 80%;
+    margin: auto;
+    max-width: 1200px;
+    padding: 20px;
+}
+
+/* Styling for headers */
+header {
+    background: var(--primary-color);
+    color: var(--btn-text-color);
+    padding: 10px 0;
+    text-align: center;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin-top: 0;
+}
+
+/* Navigation styling */
+nav {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    align-items: center;
+}
+
+nav a {
+    color: var(--link-color);
+    text-decoration: none;
+}
+
+nav a:hover {
+    color: var(--link-hover-color);
+}
+
+/* Button styling */
+button, .button {
+    background: var(--primary-color);
+    color: var(--btn-text-color);
+    border: none;
+    padding: 10px 20px;
+    margin: 10px 0;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover, .button:hover {
+    background: var(--link-hover-color);
+}
+
+/* Form styling */
+form {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+input[type="text"], input[type="email"], input[type="password"] {
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+/* Responsive layout adjustments */
+@media (max-width: 768px) {
+    .container {
+        width: 95%;
+    }
+
+    header {
+        padding: 20px 0;
+    }
+
+    form {
+        width: 100%;
+    }
 }

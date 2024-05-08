@@ -69,7 +69,6 @@ def calculate_vehicle_footprint(distance_value, vehicle_model_id):
         'distance_value': distance_value,
         'vehicle_model_id': vehicle_model_id,
     }
-
     return get_carbon_data(json_data)
 
 

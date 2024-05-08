@@ -85,8 +85,17 @@ def dashboard():
 
 @app.route('/carbon_calculator', methods=['GET', 'POST'])   
 def carbon_calculator():
-    form = CarbonCalculatorForm()
     return render_template("carbon_calculator.html")
+
+@app.route('/flight_calculator', methods=['GET', 'POST'])   
+def flight_calculator():
+    form = FlightForm()
+    return render_template("flight_calculator.html", form=form)
+
+@app.route('/vehicle_calculator', methods=['GET', 'POST'])   
+def vehicle_calculator():
+    form = VehicleForm()
+    return render_template("vehicle_calculator.html", form=form)
 
 @app.route('/log_activity', methods=['GET', 'POST'])   
 def log_activity():
