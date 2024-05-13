@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Select your vehicle model</h1>
+    <form action="" method="post" novalidate>
+        {{ create_profile_form.hidden_tag() }}
+        <p>
+            {{ create_profile_form.birthday.label }}<br>
+            {{ create_profile_form.birthday(size=32) }}
+        </p>        
+        <p>
+            {{ create_profile_form.number_in_household.label }}<br>
+            {{ create_profile_form.number_in_household(size=32) }}
+        </p>
+        <p>
+            {{ create_profile_form.diet_habit.label }}<br>
+            {{ create_profile_form.diet_habit(size=32) }}
+        </p>
+        <p>
+            {{ create_profile_form.own_car.label }}<br>
+            {{ create_profile_form.own_car(size=32) }}
+        </p>
+        <p>
+            {{ create_profile_form.make_of_vehicle.label }}<br>
+            {{ create_profile_form.make_of_vehicle(size=32) }}
+        </p>
+        <p>{{ create_profile_form.submit() }}</p>
+    <!-- </form>
+    <form action="" method="post" novalidate>
+        {{ vehicle_form.hidden_tag() }}
+        <p>
+            {{ vehicle_form.make_of_vehicle.label }}<br>
+            {{ vehicle_form.make_of_vehicle(size=32) }}
+        </p>        
+
+        <p>{{ create_profile_form.submit() }}</p>
+    </form> -->
+    <a href="{{ url_for('dashboard') }}"> View My Dashboard </a>
+{% endblock %}
+

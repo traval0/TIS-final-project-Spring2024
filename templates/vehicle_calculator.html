@@ -16,6 +16,10 @@
             {{ form.make_of_vehicle.label }}<br>
             {{ form.make_of_vehicle(size=32) }}
         </p>
+        <p>
+            {{ form.model_of_vehicle.label }}<br>
+            {{ form.model_of_vehicle(size=32) }}
+        </p>
         <p>{{ form.calculate() }}  {{ form.log_activity() }}</p>
     </form>
     <!-- <input type="Calculate" name="calculate" value="Calculate">

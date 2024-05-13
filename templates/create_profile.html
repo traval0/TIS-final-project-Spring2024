@@ -24,8 +24,12 @@
             {{ form.make_of_vehicle.label }}<br>
             {{ form.make_of_vehicle(size=32) }}
         </p>
+        <p>
+            {{ form.model_of_vehicle.label }}<br>
+            {{ form.model_of_vehicle(size=32) }}
+        </p>
         <p>{{ form.submit() }}</p>
-    </form>
+    </form> 
     <a href="{{ url_for('dashboard') }}"> View My Dashboard </a>
 {% endblock %}
 

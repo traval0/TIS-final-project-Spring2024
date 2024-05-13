@@ -23,6 +23,7 @@ class UserProfile(db.Model, UserMixin):
     diet_habit = db.Column(db.String(30))
     own_car = db.Column(db.Boolean)
     make_of_vehicle = db.Column(db.String(80))
+    model_of_vehicle = db.Column(db.String(80))
 
 
 class Activity(db.Model, UserMixin):

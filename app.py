@@ -3,7 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import login_user, LoginManager, login_required, logout_user, current_user
 from models import db, User, UserProfile
-from forms import LoginForm, RegisterForm, CreateProfileForm, FlightForm, VehicleForm
+from forms import LoginForm, RegisterForm, CreateProfileForm, FlightActivityForm, VehicleActivityForm 
+import calculations as calc
 from dotenv import load_dotenv
 import os
 import requests
@@ -68,7 +69,8 @@ def create_profile():
         # Add user profile information to user_profile database
         user_profile = UserProfile(user_id=current_user.id, user=current_user, birthday=form.birthday.data, 
                                    number_in_household=form.number_in_household.data, diet_habit=form.diet_habit.data, 
-                                   own_car=form.own_car.data, make_of_vehicle=form.make_of_vehicle.data)
+                                   own_car=form.own_car.data, make_of_vehicle=form.make_of_vehicle.data, 
+                                   model_of_vehicle=form.model_of_vehicle.data)
         db.session.add(user_profile)
         db.session.commit()
         return redirect(url_for('dashboard'))
@@ -83,18 +85,36 @@ def profile(username):
 def dashboard():
     return render_template("dashboard.html", username=current_user.username)
 
+# @app.route('/test', methods=['GET', 'POST'])   
+# def test():
+#     form = MainForm()
+#     return render_template("test.html", form=form)
+
 @app.route('/carbon_calculator', methods=['GET', 'POST'])   
 def carbon_calculator():
     return render_template("carbon_calculator.html")
 
 @app.route('/flight_calculator', methods=['GET', 'POST'])   
 def flight_calculator():
-    form = FlightForm()
+    form = FlightActivityForm()
+    if form.validate_on_submit():
+        departure_airport = form.departure_airport.data
+        arrival_airport = form.arrival_airport.data
+        response = calc.calculate_flight_footprint(departure_airport, arrival_airport)
+
     return render_template("flight_calculator.html", form=form)
 
 @app.route('/vehicle_calculator', methods=['GET', 'POST'])   
 def vehicle_calculator():
-    form = VehicleForm()
+    form = VehicleActivityForm()
+    if form.validate_on_submit():
+        distance = form.distance.data
+        number_of_passengers = form.number_of_passengers.data    # What to do with this?
+        make = form.make_of_vehicle.data
+        model = form.model_of_vehicle.data
+        response = calc.calculate_vehicle_footprint(distance, make, model)
+        flash(f"Your carbon footprint from this activity: {response['carbon_kg']} kg")
+        # return render_template("vehicle_calculator.html", form=form, carbon_data=carbon_data)
     return render_template("vehicle_calculator.html", form=form)
 
 @app.route('/log_activity', methods=['GET', 'POST'])   

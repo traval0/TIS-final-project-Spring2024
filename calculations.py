@@ -20,15 +20,28 @@ url = 'https://www.carboninterface.com/api/v1/estimates'
 # 1) Pandas dataframe for airport codes
 airport_codes_df = pd.read_csv('data/airport-codes.csv')
 
-# 2) Dictionary of vehicle makes and model IDs
-def get_vehicle_models():
-    vehicles_dict = {}
+# 2) Dictionary of vehicle makes and vehicle_make_IDs
+def vehicle_makes():
+    vehicle_makes_dict = {}
     headers = {'Authorization': f'Bearer {CARBON_INTERFACE_API_KEY}'}
     response_json = requests.get('https://www.carboninterface.com/api/v1/vehicle_makes', headers=headers).json()
     for item in response_json:
-        vehicles_dict[item['data']['attributes']['name']] = item['data']['id']
-    return vehicles_dict
-vehicles_dict = get_vehicle_models()
+        vehicle_makes_dict[item['data']['attributes']['name']] = item['data']['id']
+    return vehicle_makes_dict
+vehicle_makes = vehicle_makes()
+# print(vehicle_makes)
+
+def vehicle_models(make):
+    # print(vehicle_makes)
+    vehicle_make_id = vehicle_makes[make]
+    vehicle_models_dict = {}
+    headers = {'Authorization': f'Bearer {CARBON_INTERFACE_API_KEY}'}
+    response_json = requests.get(f'https://www.carboninterface.com/api/v1/vehicle_makes/{vehicle_make_id}/vehicle_models', headers=headers).json()
+    for item in response_json:
+        vehicle_models_dict[item['data']['attributes']['name']] = item['data']['id']
+    return vehicle_models_dict
+# print(vehicle_models('db5875e5-4986-44c5-aabc-02bbfa78c282'))
+
 
 # 3) Diet habits
 diet_habits = ['vegan', 'vegetarian', 'plant_based', 'omnivore']
@@ -46,6 +59,7 @@ def get_carbon_data(json_data):
     }
 
     response_json = requests.post(url, headers=headers, json=json_data).json() # returns a dictionary
+    print(response_json)
 
     carbon_data = {
         'carbon_g': response_json['data']['attributes']['carbon_g'],
@@ -58,11 +72,16 @@ def get_carbon_data(json_data):
 # VEHICLE CALCULATIONS
 
 # Returns the model id based on the car selected; useful for querying based on rideshares, carpooling, etc.
-def get_model_id_by_make(make):
-    model_id = vehicles_dict[make]
+def get_model_id(make, model):
+    make_id = vehicle_makes[make]
+    vehicle_models_dict = vehicle_models(make)
+    model_id = vehicle_models_dict[model]
     return model_id # returns a string
 
-def calculate_vehicle_footprint(distance_value, vehicle_model_id):
+def calculate_vehicle_footprint(distance_value, make_of_vehicle, model_of_vehicle):
+    # print(make_of_vehicle)
+    vehicle_model_id = get_model_id(make_of_vehicle, model_of_vehicle)
+    print(f"Make of vehicle: {make_of_vehicle}, Make of vehicle: {model_of_vehicle}, Model ID: {vehicle_model_id}")
     json_data = {
         'type': 'vehicle',
         'distance_unit': 'mi',
@@ -99,4 +118,10 @@ def calculate_flight_footprint(departure_airport, arrival_airport):
 # get_airport_by_iata('JFK')
 # print(get_model_id_by_make('Tesla'))
 # print(calculate_flight_footprint('JFK', 'LAX')) 
+# # print(calculate_vehicle_footprint(10, '1c2a69d5-54d3-4796-a424-ffbdf8b538d1'))
+# print(calculate_vehicle_footprint(10, 'Volvo'))
+# print(get_model_id('Tesla', 'Model S'))
+# print(vehicle_makes['Tesla'])
+# print(vehicle_models('Tesla'))
+
 
