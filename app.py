@@ -2,8 +2,8 @@ from flask import Flask, request, render_template, flash, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy 
 from flask_migrate import Migrate
 from flask_login import login_user, LoginManager, login_required, logout_user, current_user
-from models import db, User, UserProfile
-from forms import LoginForm, RegisterForm, CreateProfileForm, FlightActivityForm, VehicleActivityForm 
+from models import db, User, UserProfile, MonthlyCarbonData
+from forms import LoginForm, RegisterForm, CreateProfileForm, FlightActivityForm, VehicleActivityForm, LogMonthlyActivitiesForm, ElectricityActivityForm
 import calculations as calc
 from dotenv import load_dotenv
 import os
@@ -70,7 +70,7 @@ def create_profile():
         user_profile = UserProfile(user_id=current_user.id, user=current_user, birthday=form.birthday.data, 
                                    number_in_household=form.number_in_household.data, diet_habit=form.diet_habit.data, 
                                    own_car=form.own_car.data, make_of_vehicle=form.make_of_vehicle.data, 
-                                   model_of_vehicle=form.model_of_vehicle.data)
+                                   model_of_vehicle=form.model_of_vehicle.data, state=form.state.data)
         db.session.add(user_profile)
         db.session.commit()
         return redirect(url_for('dashboard'))
@@ -85,26 +85,22 @@ def profile(username):
 def dashboard():
     return render_template("dashboard.html", username=current_user.username)
 
-# @app.route('/test', methods=['GET', 'POST'])   
-# def test():
-#     form = MainForm()
-#     return render_template("test.html", form=form)
 
 @app.route('/carbon_calculator', methods=['GET', 'POST'])   
 def carbon_calculator():
     return render_template("carbon_calculator.html")
 
-@app.route('/flight_calculator', methods=['GET', 'POST'])   
+@app.route('/carbon_calculator/flight_calculator', methods=['GET', 'POST'])   
 def flight_calculator():
     form = FlightActivityForm()
     if form.validate_on_submit():
         departure_airport = form.departure_airport.data
         arrival_airport = form.arrival_airport.data
         response = calc.calculate_flight_footprint(departure_airport, arrival_airport)
-
+        print(response)
     return render_template("flight_calculator.html", form=form)
 
-@app.route('/vehicle_calculator', methods=['GET', 'POST'])   
+@app.route('/carbon_calculator/vehicle_calculator', methods=['GET', 'POST'])   
 def vehicle_calculator():
     form = VehicleActivityForm()
     if form.validate_on_submit():
@@ -113,13 +109,72 @@ def vehicle_calculator():
         make = form.make_of_vehicle.data
         model = form.model_of_vehicle.data
         response = calc.calculate_vehicle_footprint(distance, make, model)
+        print(response)
+        # FIX THIS
         flash(f"Your carbon footprint from this activity: {response['carbon_kg']} kg")
         # return render_template("vehicle_calculator.html", form=form, carbon_data=carbon_data)
     return render_template("vehicle_calculator.html", form=form)
 
-@app.route('/log_activity', methods=['GET', 'POST'])   
-def log_activity():
-    return render_template("log_activity.html")
+@app.route('/carbon_calculator/electricity_calculator', methods=['GET', 'POST'])   
+def electricity_calculator():
+    form = ElectricityActivityForm()
+    if form.validate_on_submit():
+        electricity_usage = form.electricity_usage.data
+        kwh_or_mwh = form.kwh_or_mwh.data
+        # NEED TO UPDATE THIS TO GET STATE AND COUNTRY INFO FROM USER PROFILE TABLE
+        response = calc.calculate_electricity_footprint(kwh_or_mwh, electricity_usage, "US", "IL")
+        print(response)
+    return render_template("electricity_calculator.html", form=form)
+
+@app.route('/log_activities', methods=['GET', 'POST'])   
+def log_activities():
+    form = LogMonthlyActivitiesForm()
+    if form.validate_on_submit():
+        month_year = form.month_year.data
+        flights = form.flights.data
+        driving_miles = form.driving_miles.data
+        electricity_usage = form.electricity_usage.data
+        kwh_or_mwh = form.kwh_or_mwh.data
+
+        # # GET DEFAULT DATA FROM USER PROFILE - done
+        default_data = get_default_data(current_user.id)
+        state = default_data['state']
+        vehicle_make = default_data['vehicle_make']
+        vehicle_model = default_data['vehicle_model']
+
+        # CALCULATE THE CARBON FOOTPRINT FOR ALL ACTIVITIES - done
+        carbon_footprint_results_dict = calc.calculate_monthly_carbon_footprint(month_year, flights, driving_miles, vehicle_make, 
+                                                                           vehicle_model, electricity_usage, kwh_or_mwh, state)
+        
+        # ADD TO DATABASE TO BE ABLE TO TRACK OVER TIME - done
+        monthly_data = MonthlyCarbonData(user_id=current_user.id, 
+                                            user=current_user, 
+                                            month_year=month_year, 
+                                            flights=flights, 
+                                            driving_miles=driving_miles, 
+                                            electricity_usage=electricity_usage, 
+                                            kwh_or_mwh=kwh_or_mwh,
+                                            flights_carbon_total_kg=carbon_footprint_results_dict['flights'],
+                                            driving_carbon_total_kg=carbon_footprint_results_dict['driving'],
+                                            electricity_carbon_total_kg=carbon_footprint_results_dict['electricity'],
+                                            total_carbon_footprint=carbon_footprint_results_dict['total_carbon_footprint']
+                                        )
+        db.session.add(monthly_data)
+        db.session.commit()
+
+        # TO-DO: Figure out how to display the results
+    return render_template("log_activities.html", form=form)
+
+def get_default_data(input_user_id):
+    state = UserProfile.query.with_entities(UserProfile.state).filter_by(user_id=input_user_id).first()
+    make = UserProfile.query.with_entities(UserProfile.make_of_vehicle).filter_by(user_id=input_user_id).first()
+    model = UserProfile.query.with_entities(UserProfile.model_of_vehicle).filter_by(user_id=input_user_id).first()
+    result = {
+        'state': state[0],
+        'vehicle_make': make[0],
+        'vehicle_model': model[0]
+    }
+    return result
 
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
@@ -127,23 +182,6 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-def calculate_carbon_footprint(CARBON_INTERFACE_API_KEY, activity_type, activity_value):
-    url = "https://www.carboninterface.com/api/v1/estimates"
-    headers = {
-        "Authorization": f"Bearer {CARBON_INTERFACE_API_KEY}",
-        "Content-Type": "application/json"
-    }
-    data = {
-        "type": "vehicle",
-        "attributes": {
-            "vehicle_model_id": activity_type,  # Adjust based on actual usage
-            "distance_value": activity_value,
-            "distance_unit": "mi",
-            "fuel_efficiency_unit": "mpg"
-        }
-    }
-    response = requests.post(url, json=data, headers=headers)
-    return response.json()
 
 if __name__ == "__main__":   # We only start the webserver when this file is called directly
     app.run(debug=True)   # This starts the app

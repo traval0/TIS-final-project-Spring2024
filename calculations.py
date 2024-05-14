@@ -13,6 +13,8 @@ url = 'https://www.carboninterface.com/api/v1/estimates'
 #     2) Password
 #     3) Own car? If so, make of vehicle
 #     4) Diet habit (card profile)
+#     5) Country
+#     6) State
 
 
 # DATA INITIALIZATION
@@ -110,6 +112,48 @@ def calculate_flight_footprint(departure_airport, arrival_airport):
     }
     return get_carbon_data(json_data)
 
+# ELECTRICITY CALCULATIONS
+def calculate_electricity_footprint(electricity_unit, electricity_usage, country, state):
+    json_data = {
+        'type': 'electricity',
+        'electricity_unit': electricity_unit,
+        'electricity_value': electricity_usage,
+        'country': country,
+        'state': state
+    }
+    return get_carbon_data(json_data)
+
+
+# MONTHLY ACTIVITIES CALCULATIONS
+def calculate_monthly_carbon_footprint(month_year, flights, driving_miles, vehicle_make, vehicle_model, electricity_usage, 
+                                       kwh_or_mwh, state):
+    total_carbon_footprint = 0
+    monthly_result = {
+        'month-year': month_year,
+        'total_carbon_footprint': 0, # 'kg
+        'flights': 0,
+        'driving': 0,
+        'electricity': 0
+    }
+    if flights:
+        individual_flights_footprint = {}
+        flights_list = flights.split(',')
+        for flight in flights_list:
+            departure_airport, arrival_airport = flight.split('-')
+            flight_carbon = calculate_flight_footprint(departure_airport, arrival_airport)
+            total_carbon_footprint += flight_carbon['carbon_kg']
+            individual_flights_footprint[flight] = flight_carbon['carbon_kg'] # Currently not returning this!!
+            monthly_result['flights'] += flight_carbon['carbon_kg'] 
+    if driving_miles:
+        vehicle_carbon = calculate_vehicle_footprint(driving_miles, vehicle_make, vehicle_model)
+        total_carbon_footprint += vehicle_carbon['carbon_kg']
+        monthly_result['driving_miles'] = vehicle_carbon['carbon_kg']
+    if electricity_usage:
+        electricity_carbon = calculate_electricity_footprint(kwh_or_mwh, electricity_usage, 'US', state)
+        total_carbon_footprint += electricity_carbon['carbon_kg']
+        monthly_result['electricity'] = electricity_carbon['carbon_kg']
+    monthly_result['total_carbon_footprint'] = total_carbon_footprint
+    return monthly_result
 
 # TESTING - everything below works!!
 # print(calculate_vehicle_footprint(10, '7268a9b7-17e8-4c8d-acca-57059252afe9'))
@@ -123,5 +167,4 @@ def calculate_flight_footprint(departure_airport, arrival_airport):
 # print(get_model_id('Tesla', 'Model S'))
 # print(vehicle_makes['Tesla'])
 # print(vehicle_models('Tesla'))
-
-
+# print(calculate_electricity_footprint('kwh', 1000, 'US', 'CA'))
