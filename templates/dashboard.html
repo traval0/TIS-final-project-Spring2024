@@ -7,4 +7,35 @@
     <a href="{{url_for('carbon_calculator')}}">Carbon Calculator</a><br>
     <a href="{{url_for('log_activities')}}">Log Your Carbon Activity</a><br>
     <a href="{{url_for('logout')}}">Click here to logout</a>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Month/Year</th>
+                <th>Total Carbon Footprint (kg)</th>
+                <th>Flights Taken</th>
+                <th>Miles Driven</th>
+                <th>Electricity Usage (kWh/MWh)</th>
+                <th>Flights Carbon Total (kg)</th>
+                <th>Driving Carbon Total (kg)</th>
+                <th>Electricity Carbon Total (kg)</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            {% for date, details in data %}
+            <tr>
+                <td>{{ date.strftime('%Y-%m') }}</td>
+                <td>{{ details.total_carbon_footprint }}</td>
+                <td>{{ details.flights }}</td>
+                <td>{{ details.driving_miles }}</td>
+                <td>{{ details.electricity_usage }} {{ details.kwh_or_mwh }}</td>
+                <td>{{ details.flights_carbon_total_kg }}</td>
+                <td>{{ details.driving_carbon_total_kg }}</td>
+                <td>{{ details.electricity_carbon_total_kg }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
 {% endblock %}

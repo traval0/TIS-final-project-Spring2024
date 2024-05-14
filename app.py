@@ -7,7 +7,6 @@ from forms import LoginForm, RegisterForm, CreateProfileForm, FlightActivityForm
 import calculations as calc
 from dotenv import load_dotenv
 import os
-import requests
 from flask_bcrypt import Bcrypt
 
 load_dotenv()
@@ -22,6 +21,7 @@ bcrypt = Bcrypt(app)
 app.config['SECRET_KEY'] = 'thisisasecretkey'
 
 with app.app_context():
+    # db.drop_all()   # Uncomment to reset the tables
     db.create_all()
 
 login_manager = LoginManager()
@@ -83,8 +83,25 @@ def profile(username):
 @app.route('/dashboard', methods=['GET', 'POST'])   
 @login_required
 def dashboard():
-    return render_template("dashboard.html", username=current_user.username)
+    monthly_data = get_monthly_data(current_user.id)
+    print(monthly_data)
+    return render_template("dashboard.html", username=current_user.username, data=monthly_data)
 
+def get_monthly_data(input_user_id):
+    monthly_data_list = []   # list of tuples where 1st element is month_year and 2nd element is dictionary of monthly results
+    monthly_data = MonthlyCarbonData.query.filter_by(user_id=input_user_id).all()
+    for month in monthly_data:
+        month_dict = {}
+        month_dict['flights'] = month.flights
+        month_dict['driving_miles'] = month.driving_miles
+        month_dict['electricity_usage'] = month.electricity_usage
+        month_dict['kwh_or_mwh'] = month.kwh_or_mwh
+        month_dict['flights_carbon_total_kg'] = month.flights_carbon_total_kg
+        month_dict['driving_carbon_total_kg'] = month.driving_carbon_total_kg
+        month_dict['electricity_carbon_total_kg'] = month.electricity_carbon_total_kg
+        month_dict['total_carbon_footprint'] = month.total_carbon_footprint
+        monthly_data_list.append((month.month_year, month_dict))
+    return monthly_data_list
 
 @app.route('/carbon_calculator', methods=['GET', 'POST'])   
 def carbon_calculator():
@@ -176,6 +193,7 @@ def get_default_data(input_user_id):
     }
     return result
 
+
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
 def logout():
@@ -183,7 +201,7 @@ def logout():
     return redirect(url_for('login'))
 
 
-if __name__ == "__main__":   # We only start the webserver when this file is called directly
-    app.run(debug=True)   # This starts the app
+if __name__ == "__main__":
+    app.run(debug=True)
 
 
