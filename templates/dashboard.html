@@ -2,12 +2,77 @@
 
 {% block content %}
     <h1>My Dashboard</h1>
-    <!-- <button id="carbon_calculator">Carbon Calculator</button>
-    <button id="log_activity">Log My Activity</button> -->
-    <a href="{{url_for('carbon_calculator')}}">Carbon Calculator</a><br>
     <a href="{{url_for('log_activities')}}">Log Your Carbon Activity</a><br>
-    <a href="{{url_for('logout')}}">Click here to logout</a>
+    <p></p>
+    <div style="display: flex; justify-content: space-around;">
+        <div style="flex: 1; padding: 10px; max-width: 50%;">
+            <canvas id="lineChart"></canvas>
+        </div>
+    
+        <div style="flex: 1; padding: 10px; max-width: 50%;">
+            <canvas id="pieChart"></canvas>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        const ctx = document.getElementById('lineChart');
+        const ctx2 = document.getElementById('pieChart'); 
+        const noDataMessage = document.getElementById('noDataMessage');
+    
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: {{ labels | safe }},
+            datasets: [{
+              label: 'Monthly Carbon Footprint (kg)',
+              data: {{ data | safe }},
+              borderWidth: 1
+            }]
+          },
+          options: {
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            }
+          }
+        });
+    
+        // if (this_month_data) {
+        new Chart(ctx2, {
+            type: 'doughnut',
+            data: {
+                labels: {{ this_month_labels | tojson | safe }},
+                datasets: [{
+                    label: 'Data for Second Chart',
+                    data: {{ this_month_data | tojson | safe }},
+                    borderWidth: 1,
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ], // Example colors for each segment
+                }]
+            },
+            options: {
+                responsive: true, // Make sure the chart is responsive
+                maintainAspectRatio: false, // Maintain aspect ratio based on the parent container
+            }
+});
+        // } else {
+        //     ctx2.style.display = 'none';
+        //     noDataMessage.style.display = 'block';
+        // }
+    </script>
+    <p></p>
 
+    <h2>Detail View</h2>
     <table border="1">
         <thead>
             <tr>
@@ -23,7 +88,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for date, details in data %}
+            {% for date, details in monthly_data %}
             <tr>
                 <td>{{ date.strftime('%Y-%m') }}</td>
                 <td>{{ details.total_carbon_footprint }}</td>

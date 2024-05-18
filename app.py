@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template, flash, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy 
+from sqlalchemy import desc
 from flask_migrate import Migrate
 from flask_login import login_user, LoginManager, login_required, logout_user, current_user
 from models import db, User, UserProfile, MonthlyCarbonData
@@ -8,6 +9,7 @@ import calculations as calc
 from dotenv import load_dotenv
 import os
 from flask_bcrypt import Bcrypt
+from datetime import datetime
 
 load_dotenv()
 
@@ -84,24 +86,61 @@ def profile(username):
 @login_required
 def dashboard():
     monthly_data = get_monthly_data(current_user.id)
-    print(monthly_data)
-    return render_template("dashboard.html", username=current_user.username, data=monthly_data)
+    labels = [month[0].strftime("%Y-%m") for month in monthly_data]
+    data = [month[1]['total_carbon_footprint'] for month in monthly_data] 
+    # this_month_data = get_this_months_data(current_user.id)
+    this_month_labels = ['flights_carbon_total_kg', 'driving_carbon_total_kg', 'electricity_carbon_total_kg']
+    latest_month = get_latest_month_data(current_user.id)
+    latest_month_chart_data = [latest_month['flights_carbon_total_kg'], latest_month['driving_carbon_total_kg'], 
+                               latest_month['electricity_carbon_total_kg']]
+    print(get_latest_month_data(current_user.id))
+    print(this_month_labels)
+    print(latest_month_chart_data)
+    return render_template("dashboard.html", username=current_user.username, labels=labels, data=data, 
+                           monthly_data=monthly_data, this_month_data=latest_month_chart_data, this_month_labels=this_month_labels)
 
 def get_monthly_data(input_user_id):
     monthly_data_list = []   # list of tuples where 1st element is month_year and 2nd element is dictionary of monthly results
     monthly_data = MonthlyCarbonData.query.filter_by(user_id=input_user_id).all()
     for month in monthly_data:
-        month_dict = {}
-        month_dict['flights'] = month.flights
-        month_dict['driving_miles'] = month.driving_miles
-        month_dict['electricity_usage'] = month.electricity_usage
-        month_dict['kwh_or_mwh'] = month.kwh_or_mwh
-        month_dict['flights_carbon_total_kg'] = month.flights_carbon_total_kg
-        month_dict['driving_carbon_total_kg'] = month.driving_carbon_total_kg
-        month_dict['electricity_carbon_total_kg'] = month.electricity_carbon_total_kg
-        month_dict['total_carbon_footprint'] = month.total_carbon_footprint
-        monthly_data_list.append((month.month_year, month_dict))
+        # month_dict = {}
+        # month_dict['flights'] = month.flights
+        # month_dict['driving_miles'] = month.driving_miles
+        # month_dict['electricity_usage'] = month.electricity_usage
+        # month_dict['kwh_or_mwh'] = month.kwh_or_mwh
+        # month_dict['flights_carbon_total_kg'] = month.flights_carbon_total_kg
+        # month_dict['driving_carbon_total_kg'] = month.driving_carbon_total_kg
+        # month_dict['electricity_carbon_total_kg'] = month.electricity_carbon_total_kg
+        # month_dict['total_carbon_footprint'] = month.total_carbon_footprint
+        # monthly_data_list.append((month.month_year, month_dict))
+        monthly_data_list.append((month.month_year, monthly_carbon_to_dict(month)))
     return monthly_data_list
+
+def monthly_carbon_to_dict(monthly_carbon_data):
+    month_dict = {}
+    month_dict['flights'] = monthly_carbon_data.flights
+    month_dict['driving_miles'] = monthly_carbon_data.driving_miles
+    month_dict['electricity_usage'] = monthly_carbon_data.electricity_usage
+    month_dict['kwh_or_mwh'] = monthly_carbon_data.kwh_or_mwh
+    month_dict['flights_carbon_total_kg'] = monthly_carbon_data.flights_carbon_total_kg
+    month_dict['driving_carbon_total_kg'] = monthly_carbon_data.driving_carbon_total_kg
+    month_dict['electricity_carbon_total_kg'] = monthly_carbon_data.electricity_carbon_total_kg
+    month_dict['total_carbon_footprint'] = monthly_carbon_data.total_carbon_footprint
+    return month_dict
+
+def get_this_months_data(input_user_id):
+    today = datetime.today()
+    this_month = datetime(today.year, today.month, 1)
+    monthly_data = MonthlyCarbonData.query.filter_by(user_id=input_user_id, month_year=this_month).first()
+    if monthly_data:
+        return monthly_carbon_to_dict(monthly_data)
+    else:
+        return None
+
+def get_latest_month_data(input_user_id):
+    latest_month_data = MonthlyCarbonData.query.filter_by(user_id=input_user_id).order_by(
+        desc(MonthlyCarbonData.month_year)).first()    
+    return monthly_carbon_to_dict(latest_month_data)
 
 @app.route('/carbon_calculator', methods=['GET', 'POST'])   
 def carbon_calculator():

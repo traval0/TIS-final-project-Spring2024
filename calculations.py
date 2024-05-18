@@ -168,3 +168,6 @@ def calculate_monthly_carbon_footprint(month_year, flights, driving_miles, vehic
 # print(vehicle_makes['Tesla'])
 # print(vehicle_models('Tesla'))
 # print(calculate_electricity_footprint('kwh', 1000, 'US', 'CA'))
+
+# print(calculate_monthly_carbon_footprint("Feb 2021", "CHI-SAN,SAN-CHI", 10, "Tesla", "Model S", 
+#                                         10, 'kwh', "IL"))

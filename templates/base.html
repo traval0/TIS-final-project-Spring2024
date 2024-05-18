@@ -1,16 +1,55 @@
 <!doctype html>
 <html>
-    <head>
-      {% if title %}
-      <title>{{ title }} - My App</title>
-      {% else %}
-      <title>Welcome to My App</title>
-      {% endif %}
-    </head>
-    <body>
-        <div>My Carbon Footprint: <a href="/index">Home</a></div>
-        <hr>
-        {% block content %}{% endblock %}
-    </body>
+  <head>
+    {% if title %}
+    <title>{{ title }} - My Carbon Footprint</title>
+    {% else %}
+    <title>Welcome to My Carbon Footprint</title>
+    {% endif %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            /* padding: 10px 20px; */
+            background-color: white;
+            font-weight: bold;
+        }
+        .header-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        .header-links a {
+            text-decoration: none;
+            color: #ffffff; 
+
+        }
+        .logout-link {
+            text-align: right;
+            font-size: 16px;
+        }
+        .logout-link a {
+            color: rgb(253, 252, 252); 
+            text-decoration: none;
+        }
+    </style>
+  </head>
+  <body>
+    <header>
+        <div class="app-name">My Carbon Footprint</div>
+        <div class="header-links">
+            <a href="/dashboard">My Dashboard</a>
+            <a href="/log_activities">Log Activities</a>
+            <a href="/carbon_calculator">Carbon Calculator</a>
+        </div>
+        <div class="logout-link">
+            <a href="/logout">Logout</a>
+        </div>
+    </header>
+    <hr>
+    {% block content %}{% endblock %}
+</body>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
 </html>
