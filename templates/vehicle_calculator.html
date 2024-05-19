@@ -20,9 +20,14 @@
             {{ form.model_of_vehicle.label }}<br>
             {{ form.model_of_vehicle(size=32) }}
         </p>
-        <p>{{ form.calculate() }}  {{ form.log_activity() }}</p>
+        <p>{{ form.calculate() }}</p>
     </form>
-    <!-- <input type="Calculate" name="calculate" value="Calculate">
-    <input type="Log" name="log" value="Log Activity"> -->
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for message in messages %}
+            {{ message }}
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
     <p></p><a href="{{url_for('carbon_calculator')}}">Back to Main Calculator Page</a></p>
 {% endblock %}

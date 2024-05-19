@@ -38,7 +38,7 @@ class RegisterForm(FlaskForm):
 #     model_of_vehicle = SelectField('Model of Vehicle', choices=[])
 #     submit = SubmitField('Complete Profile')
 
-class CreateProfileForm(FlaskForm):
+class ProfileForm(FlaskForm):
     birthday = DateField('Enter Your Birthday')
     number_in_household = IntegerField('Number of people in your household')
     diet_habit = SelectField('Diet Habit', choices=diet_habits)
@@ -47,6 +47,16 @@ class CreateProfileForm(FlaskForm):
     make_of_vehicle = StringField('Make of Vehicle')
     model_of_vehicle = StringField('Model of Vehicle')
     submit = SubmitField('Complete Profile')
+
+# class EditProfileForm(FlaskForm):
+#     birthday = DateField('Your Birthday')
+#     number_in_household = IntegerField('Number of people in your household')
+#     diet_habit = SelectField('Diet Habit', choices=diet_habits)
+#     own_car = BooleanField('I own a car')
+#     state = StringField('State (2 letter code)', validators=[InputRequired(), Length(min=2, max=2)])
+#     make_of_vehicle = StringField('Make of Vehicle')
+#     model_of_vehicle = StringField('Model of Vehicle')
+#     submit = SubmitField('Update Profile')
 
 # class VehicleModelForm(FlaskForm):
 #     model_of_vehicle = SelectField('Model of Vehicle', choices=vehicle_models(make).keys())
@@ -76,9 +86,9 @@ class VehicleActivityForm(FlaskForm):
 class ElectricityActivityForm(FlaskForm):
     electricity_usage = FloatField('Enter Electricity Usage this Month & Select Units')
     kwh_or_mwh = SelectField('Electricity Usage Unit', choices=[('kwh', 'kWh'), ('mwh', 'MWh')], render_kw={'style': 'height: 5ch'},)
-    log_activity = SubmitField('Log Data')
+    calculate = SubmitField('Calculate Carbon Footprint')
 
-class LogMonthlyActivitiesForm(FlaskForm):
+class MonthlyActivitiesForm(FlaskForm):
     month_year = MonthField("Select the Month/Year to log data for")
     flights = StringField('Individual Flight Legs Taken this Month')
     driving_miles = FloatField('Miles Driven this Month')

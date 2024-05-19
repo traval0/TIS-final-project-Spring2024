@@ -12,9 +12,15 @@
             {{ form.arrival_airport.label }}<br>
             {{ form.arrival_airport(size=32) }}
         </p>
-        <p>{{ form.calculate() }}  {{ form.log_activity() }}</p>
+        <p>{{ form.calculate() }}</p>
     </form>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for message in messages %}
+            {{ message }}
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
     <p></p><a href="{{url_for('carbon_calculator')}}">Back to Main Calculator Page</a></p>
-    <!-- <input type="Calculate" name="calculate" value="Calculate">
-    <input type="Log" name="log" value="Log Activity"> -->
+
 {% endblock %}

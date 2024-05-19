@@ -11,6 +11,7 @@
     
         <div style="flex: 1; padding: 10px; max-width: 50%;">
             <canvas id="pieChart"></canvas>
+            <div id="noDataMessage" style="display: none;">Log your carbon activity for this month to see results</div>
         </div>
     </div>
     
@@ -32,6 +33,19 @@
             }]
           },
           options: {
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'My Carbon Footprint Over Time',
+                    font: {
+                    size: 20
+                    },
+                    padding: {
+                    top: 10,
+                    bottom: 30
+                    }
+                }
+                },
             scales: {
               y: {
                 beginAtZero: true
@@ -39,40 +53,58 @@
             }
           }
         });
-    
-        // if (this_month_data) {
-        new Chart(ctx2, {
-            type: 'doughnut',
-            data: {
-                labels: {{ this_month_labels | tojson | safe }},
-                datasets: [{
-                    label: 'Data for Second Chart',
-                    data: {{ this_month_data | tojson | safe }},
-                    borderWidth: 1,
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.2)',
-                        'rgba(54, 162, 235, 0.2)',
-                        'rgba(255, 206, 86, 0.2)',
-                        'rgba(75, 192, 192, 0.2)',
-                        'rgba(153, 102, 255, 0.2)',
-                        'rgba(255, 159, 64, 0.2)'
-                    ], // Example colors for each segment
-                }]
-            },
-            options: {
-                responsive: true, // Make sure the chart is responsive
-                maintainAspectRatio: false, // Maintain aspect ratio based on the parent container
-            }
-});
-        // } else {
-        //     ctx2.style.display = 'none';
-        //     noDataMessage.style.display = 'block';
-        // }
+
+        let this_month_data_array = {{ this_month_data | tojson | safe }};
+        // console.log(jsArray);
+        if (this_month_data_array) {
+            new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: {{ this_month_labels | tojson | safe }},
+                    datasets: [{
+                        label: 'Carbon Footprint by Activity (kg)',
+                        data: this_month_data_array,
+                        borderWidth: 1,
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)'
+                        ], 
+                    }]
+                },
+                options: {
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'This Month\'s Carbon Footprint by Activity',
+                            font: {
+                            size: 20
+                            },
+                            padding: {
+                            top: 10,
+                            bottom: 30
+                            }
+                        }
+                        },
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                }
+            });
+        } 
+        else {
+            console.log("No data");
+            ctx2.style.display = 'none';
+            noDataMessage.style.display = 'block';
+        }
     </script>
     <p></p>
 
     <h2>Detail View</h2>
+    <!-- <a href="{{url_for('log_activities')}}">Log Your Carbon Activity</a><br> -->
     <table border="1">
         <thead>
             <tr>
@@ -84,6 +116,7 @@
                 <th>Flights Carbon Total (kg)</th>
                 <th>Driving Carbon Total (kg)</th>
                 <th>Electricity Carbon Total (kg)</th>
+                <th>Edit</th>
 
             </tr>
         </thead>
@@ -98,6 +131,7 @@
                 <td>{{ details.flights_carbon_total_kg }}</td>
                 <td>{{ details.driving_carbon_total_kg }}</td>
                 <td>{{ details.electricity_carbon_total_kg }}</td>
+                <td><a href="{{url_for('edit_activities', month_year=date)}}">Edit</a></td>
             </tr>
             {% endfor %}
         </tbody>

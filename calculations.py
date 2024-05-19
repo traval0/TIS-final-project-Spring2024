@@ -148,6 +148,7 @@ def calculate_monthly_carbon_footprint(month_year, flights, driving_miles, vehic
         vehicle_carbon = calculate_vehicle_footprint(driving_miles, vehicle_make, vehicle_model)
         total_carbon_footprint += vehicle_carbon['carbon_kg']
         monthly_result['driving_miles'] = vehicle_carbon['carbon_kg']
+        print(vehicle_make, vehicle_model, driving_miles, vehicle_carbon['carbon_kg'])
     if electricity_usage:
         electricity_carbon = calculate_electricity_footprint(kwh_or_mwh, electricity_usage, 'US', state)
         total_carbon_footprint += electricity_carbon['carbon_kg']
