@@ -31,10 +31,8 @@ def vehicle_makes():
         vehicle_makes_dict[item['data']['attributes']['name']] = item['data']['id']
     return vehicle_makes_dict
 vehicle_makes = vehicle_makes()
-# print(vehicle_makes)
 
 def vehicle_models(make):
-    # print(vehicle_makes)
     vehicle_make_id = vehicle_makes[make]
     vehicle_models_dict = {}
     headers = {'Authorization': f'Bearer {CARBON_INTERFACE_API_KEY}'}
@@ -42,8 +40,6 @@ def vehicle_models(make):
     for item in response_json:
         vehicle_models_dict[item['data']['attributes']['name']] = item['data']['id']
     return vehicle_models_dict
-# print(vehicle_models('db5875e5-4986-44c5-aabc-02bbfa78c282'))
-
 
 # 3) Diet habits
 diet_habits = ['vegan', 'vegetarian', 'plant_based', 'omnivore']
@@ -61,7 +57,6 @@ def get_carbon_data(json_data):
     }
 
     response_json = requests.post(url, headers=headers, json=json_data).json() # returns a dictionary
-    print(response_json)
 
     carbon_data = {
         'carbon_g': response_json['data']['attributes']['carbon_g'],
@@ -81,9 +76,7 @@ def get_model_id(make, model):
     return model_id # returns a string
 
 def calculate_vehicle_footprint(distance_value, make_of_vehicle, model_of_vehicle):
-    # print(make_of_vehicle)
     vehicle_model_id = get_model_id(make_of_vehicle, model_of_vehicle)
-    print(f"Make of vehicle: {make_of_vehicle}, Make of vehicle: {model_of_vehicle}, Model ID: {vehicle_model_id}")
     json_data = {
         'type': 'vehicle',
         'distance_unit': 'mi',
@@ -147,28 +140,10 @@ def calculate_monthly_carbon_footprint(month_year, flights, driving_miles, vehic
     if driving_miles:
         vehicle_carbon = calculate_vehicle_footprint(driving_miles, vehicle_make, vehicle_model)
         total_carbon_footprint += vehicle_carbon['carbon_kg']
-        monthly_result['driving_miles'] = vehicle_carbon['carbon_kg']
-        print(vehicle_make, vehicle_model, driving_miles, vehicle_carbon['carbon_kg'])
+        monthly_result['driving'] = vehicle_carbon['carbon_kg']
     if electricity_usage:
         electricity_carbon = calculate_electricity_footprint(kwh_or_mwh, electricity_usage, 'US', state)
         total_carbon_footprint += electricity_carbon['carbon_kg']
         monthly_result['electricity'] = electricity_carbon['carbon_kg']
     monthly_result['total_carbon_footprint'] = total_carbon_footprint
     return monthly_result
-
-# TESTING - everything below works!!
-# print(calculate_vehicle_footprint(10, '7268a9b7-17e8-4c8d-acca-57059252afe9'))
-# print(get_vehicle_models())
-# print(vehicles_dict)
-# get_airport_by_iata('JFK')
-# print(get_model_id_by_make('Tesla'))
-# print(calculate_flight_footprint('JFK', 'LAX')) 
-# # print(calculate_vehicle_footprint(10, '1c2a69d5-54d3-4796-a424-ffbdf8b538d1'))
-# print(calculate_vehicle_footprint(10, 'Volvo'))
-# print(get_model_id('Tesla', 'Model S'))
-# print(vehicle_makes['Tesla'])
-# print(vehicle_models('Tesla'))
-# print(calculate_electricity_footprint('kwh', 1000, 'US', 'CA'))
-
-# print(calculate_monthly_carbon_footprint("Feb 2021", "CHI-SAN,SAN-CHI", 10, "Tesla", "Model S", 
-#                                         10, 'kwh', "IL"))

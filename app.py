@@ -56,11 +56,13 @@ def login():
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
+        username = form.username.data
         hashed_password = bcrypt.generate_password_hash(form.password.data)
-        new_user = User(username=form.username.data, password=hashed_password)
+        new_user = User(username=username, password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
-        return redirect(url_for('create_profile'))
+        login_user(new_user)
+        return redirect(url_for(f'create_profile'))
     return render_template('register.html', form=form)
 
 @app.route('/createprofile', methods=['GET', 'POST'])  
